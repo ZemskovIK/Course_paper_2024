@@ -14,7 +14,7 @@ void Database::run() {
     structCursorInfo.dwSize = 10;
     SetConsoleCursorInfo(hStdOut, &structCursorInfo);
 
-    std::vector<std::string> menuItems = { "Показать студентов", "Добавить студента", "Загрузить базу данных", "Сохранить базу данных", "Выбрать студента", "Выход" };
+    std::vector<std::string> menuItems = { "Показать студентов", "Добавить студента", "Загрузить базу данных", "Сохранить базу данных", "Выбрать студента", "Выполнить вариант 88", "Выход" };
     Menu menu(menuItems);
     while (true) {
         system("CLS");
@@ -38,6 +38,9 @@ void Database::run() {
             this->SelectStudent();
             break;
         case 5:
+            this->ExecutedTask();
+            break;
+        case 6:
             return;
         }
     }
@@ -132,7 +135,7 @@ void Database::SelectStudent() {
                 if (!grades.empty()) {
                     std::cout << "Семестр " << semester << ":\n";
                     for (const auto& [subject, grade] : grades) {
-                        std::cout << subject << ": " << grade << "\n";
+                        std::cout << subject << ":" << grade << "\n";
                     }
                     std::cout << "\n";
                 }
@@ -225,18 +228,18 @@ void Database::SaveToFile(const std::string& filename) {
                 << student.GetDepartment() << " "
                 << student.GetGroup() << " "
                 << student.GetRecordBookNumber() << " "
-                << student.GetGender() << "\n";
+                << student.GetGender() << " ";
 
             for (int semester = 1; semester <= 9; ++semester) {
                 const auto& grades = student.GetGrades(semester);
                 if (!grades.empty()) {
                     file << semester;
-                    for (const auto& [subject, grade] : grades) {
-                        file << " " << subject << ":" << grade;
+                    for (const auto& grade : grades) {
+                        file << " " << grade.first << ":" << grade.second;
                     }
-                    file << "\n";
                 }
             }
+            file << "\n";
         }
         file.close();
     }
@@ -261,21 +264,13 @@ void Database::LoadFromFile(const std::string& filename) {
             iss >> lastName >> firstName >> patronymic >> day >> month >> year >> admissionYear >> faculty >> department >> group >> recordBookNumber >> gender;
 
             Student student(lastName, firstName, patronymic, day, month, year, admissionYear, faculty, department, group, recordBookNumber, gender);
-
-            /*std::string line2;
-            while (std::getline(file, line2) && !line2.empty()) {
-                std::istringstream gradeStream(line2);
+            for (int j = 0; j <= 9; j++) {
                 int semester;
-                gradeStream >> semester;
-
-                std::string gradePair;
-                while (gradeStream >> gradePair) {
-                    auto pos = gradePair.find(':');
-                    std::string subject = gradePair.substr(0, pos);
-                    std::string grade = gradePair.substr(pos + 1);
-                    student.SetGrade(semester, subject, grade);
-                }
-            }*/
+                std::string subject, mark;
+                iss >> semester >> subject >> mark;
+                student.SetGrade(semester, subject, mark);
+            }
+            
             students.push_back(student);
         }
         file.close();
@@ -285,6 +280,31 @@ void Database::LoadFromFile(const std::string& filename) {
     }
     system("CLS");
     std::cout << "База данных загружена.\n";
+    system("pause");
+}
+
+void Database::ExecutedTask() {
+    system("CLS");
+    int interval_1, interval_2;
+    std::cout << "Укажите интервал года рождения" << std::endl;
+    std::cin >> interval_1 >> interval_2;
+    for (int i = 0; i < this->students.size(); i++) {
+        bool check = true;
+        if (students[i].GetYear() >= interval_1 and students[i].GetYear() <= interval_2) {
+            for (int j = 0; j <= 9; j++) {
+                for (std::string subject : std::vector<std::string>{"Физика", "Линал", "История", "Матан"}) {
+                    if (students[i].grades[j][subject] == "3") {
+                        check = false;
+                        break;
+                    }
+                }
+            }
+        }
+        if (check) {
+            std::cout << students[i].GetLastName() << " " << students[i].GetFirstName() << " ";
+            std::cout << students[i].GetPatronymic() << " " << students[i].GetGroup() << std::endl;
+        }
+    }
     system("pause");
 }
 

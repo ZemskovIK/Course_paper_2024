@@ -27,6 +27,9 @@
     <ClCompile Include="Database.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="crypter.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Menu.h">
@@ -36,6 +39,9 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="Database.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="crypter.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

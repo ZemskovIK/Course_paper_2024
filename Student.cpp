@@ -60,7 +60,7 @@ const std::unordered_map<std::string, std::string>& Student::GetGrades(int semes
 }
 
 void Student::SetGrade(int semester, const std::string& subject, const std::string& grade) {
-    grades[semester][subject] = grade;
+    this->grades[semester][subject] = grade;
 }
 
 void Student::UpdateData(const std::string& lastName, const std::string& firstName, const std::string& patronymic, int day, int month, int year, int admissionYear, const std::string& faculty, const std::string& department, const std::string& group, const std::string& gender) {

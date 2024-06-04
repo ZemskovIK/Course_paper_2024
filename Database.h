@@ -16,6 +16,7 @@ public:
     void SelectStudent();
     void SaveToFile(const std::string& filename);
     void LoadFromFile(const std::string& filename);
+    void ExecutedTask();
     const std::vector<Student>& GetStudents() const;
     Student* GetStudentByRecordBookNumber(const std::string& recordBookNumber);
     bool DeleteStudent(const std::string& recordBookNumber);

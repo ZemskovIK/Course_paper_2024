@@ -36,8 +36,9 @@ private:
     std::string group;
     std::string recordBookNumber;
     std::string gender;
-    std::unordered_map<int, std::unordered_map<std::string, std::string>> grades;
     static const std::unordered_map<std::string, std::string> emptyGrades;
+public:
+    std::unordered_map<int, std::unordered_map<std::string, std::string>> grades;
 };
 
 #endif // STUDENT_H
