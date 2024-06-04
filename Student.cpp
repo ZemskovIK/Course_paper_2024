@@ -1,4 +1,7 @@
 #include "Student.h"
+#include <algorithm>
+
+const std::unordered_map<std::string, std::string> Student::emptyGrades = {};
 
 Student::Student(const std::string& lastName, const std::string& firstName, const std::string& patronymic, int day, int month, int year, int admissionYear, const std::string& faculty, const std::string& department, const std::string& group, const std::string& recordBookNumber, const std::string& gender)
     : lastName(lastName), firstName(firstName), patronymic(patronymic), day(day), month(month), year(year), admissionYear(admissionYear), faculty(faculty), department(department), group(group), recordBookNumber(recordBookNumber), gender(gender) {}
@@ -49,4 +52,27 @@ const std::string& Student::GetRecordBookNumber() const {
 
 const std::string& Student::GetGender() const {
     return gender;
+}
+
+const std::unordered_map<std::string, std::string>& Student::GetGrades(int semester) const {
+    auto it = grades.find(semester);
+    return it != grades.end() ? it->second : emptyGrades;
+}
+
+void Student::SetGrade(int semester, const std::string& subject, const std::string& grade) {
+    grades[semester][subject] = grade;
+}
+
+void Student::UpdateData(const std::string& lastName, const std::string& firstName, const std::string& patronymic, int day, int month, int year, int admissionYear, const std::string& faculty, const std::string& department, const std::string& group, const std::string& gender) {
+    this->lastName = lastName;
+    this->firstName = firstName;
+    this->patronymic = patronymic;
+    this->day = day;
+    this->month = month;
+    this->year = year;
+    this->admissionYear = admissionYear;
+    this->faculty = faculty;
+    this->department = department;
+    this->group = group;
+    this->gender = gender;
 }

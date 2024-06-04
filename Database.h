@@ -4,17 +4,21 @@
 #include "Student.h"
 #include <vector>
 #include <fstream>
+#include <sstream>
+#include <algorithm>
 
 class Database {
-private:
-    std::vector<Student> students;
-
 public:
     Database();
     void AddStudent(const Student& student);
     void SaveToFile(const std::string& filename);
     void LoadFromFile(const std::string& filename);
     const std::vector<Student>& GetStudents() const;
+    Student* GetStudentByRecordBookNumber(const std::string& recordBookNumber);
+    bool DeleteStudent(const std::string& recordBookNumber);
+
+private:
+    std::vector<Student> students;
 };
 
-#endif
+#endif // DATABASE_H
