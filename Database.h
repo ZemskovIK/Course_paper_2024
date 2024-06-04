@@ -10,7 +10,10 @@
 class Database {
 public:
     Database();
-    void AddStudent(const Student& student);
+    void run();
+    void DisplayStudents();
+    void AddStudent();
+    void SelectStudent();
     void SaveToFile(const std::string& filename);
     void LoadFromFile(const std::string& filename);
     const std::vector<Student>& GetStudents() const;

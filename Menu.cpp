@@ -63,6 +63,7 @@ int Menu::HandleInput() {
         switch (ch) {
         case ESC:
             exit(0);
+            break;
         case UP:
             if (activeItem > 0)
                 --activeItem;
