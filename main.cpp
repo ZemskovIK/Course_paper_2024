@@ -29,8 +29,11 @@ int main() {
     Crypter crypter;
     Database db;
     crypter.Decrypt();
+    std::cout << "БД расшифрована!\n";
+    system("pause");
     db.run();    
     crypter.Crypt();
+    std::cout << "БД зашифрована!\n";
 
     return 0;
 }

@@ -1,6 +1,7 @@
 #include "Menu.h"
 #include <conio.h>
 #include <iostream>
+#include <windows.h>
 
 #define ESC 27
 #define UP 72
