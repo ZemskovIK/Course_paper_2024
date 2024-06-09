@@ -5,6 +5,7 @@
 #include <conio.h>
 #include "Menu.h"
 #include "Database.h"
+#include "ConsoleUtils.h"
 #include "crypter.h"
 
 #define ESC 27
@@ -12,15 +13,15 @@
 #define DOWN 80
 #define ENTER 13
 
-HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-
-void ConsoleCursorVisible(bool show, short size) {
-    CONSOLE_CURSOR_INFO structCursorInfo;
-    GetConsoleCursorInfo(hStdOut, &structCursorInfo);
-    structCursorInfo.bVisible = show;
-    structCursorInfo.dwSize = size;
-    SetConsoleCursorInfo(hStdOut, &structCursorInfo);
-}
+//HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+//
+//void ConsoleCursorVisible(bool show, short size) {
+//    CONSOLE_CURSOR_INFO structCursorInfo;
+//    GetConsoleCursorInfo(hStdOut, &structCursorInfo);
+//    structCursorInfo.bVisible = show;
+//    structCursorInfo.dwSize = size;
+//    SetConsoleCursorInfo(hStdOut, &structCursorInfo);
+//}
 
 
 int main() {

@@ -1,4 +1,5 @@
 #include "Menu.h"
+#include "ConsoleUtils.h"
 #include <conio.h>
 #include <iostream>
 #include <windows.h>
@@ -12,10 +13,10 @@ Menu::Menu(const std::vector<std::string>& items) : items(items), activeItem(0) 
     hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 }
 
-void GoToXY(short x, short y) {
-    HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleCursorPosition(hStdOut, { x, y });
-}
+//void GoToXY(short x, short y) {
+//    HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+//    SetConsoleCursorPosition(hStdOut, { x, y });
+//}
 
 void DrawBox(int x, int y, int width, int height) {
     HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -38,24 +39,38 @@ void Menu::Display() const {
     int x = 50, y = 10;
     int width = 25, height = static_cast<int>(items.size()) + 4;
 
+    //GoToXY(0, 0);
+    //SetConsoleTextAttribute(hStdOut, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY); // Белый цвет
+    //std::cout << "Курсовая работа по Языкам Программирования 1 курс, 2 семестр";
+
+    //GoToXY(0, 2);
+    //SetConsoleTextAttribute(hStdOut, FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY); // Фиолетовый цвет
+    //std::cout << "Выполнил студент группы БИСО-01-23\nГордеев Михаил";
+
     // Рисуем рамку
     DrawBox(x - 2, y - 2, width, height);
 
     // Заголовок меню
     GoToXY(x, y - 1);
-    SetConsoleTextAttribute(hStdOut, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+    SetConsoleTextAttribute(hStdOut, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY); // Желтый цвет
     std::cout << "      М Е Н Ю  ";
 
     // Отображение пунктов меню
     for (size_t i = 0; i < items.size(); ++i) {
         GoToXY(x, y + i);
-        if (i == activeItem)
-            SetConsoleTextAttribute(hStdOut, BACKGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-        else
-            SetConsoleTextAttribute(hStdOut, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-        std::cout << items[i];
+        if (i == activeItem) {
+            SetConsoleTextAttribute(hStdOut, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY); // Белый цвет для активного элемента
+            std::cout << items[i];
+        }
+        else {
+            SetConsoleTextAttribute(hStdOut, FOREGROUND_GREEN | FOREGROUND_INTENSITY); // Зеленый цвет для неактивных элементов
+            std::cout << items[i];
+        }
     }
+    // Сброс цвета к стандартному
+    SetConsoleTextAttribute(hStdOut, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
 }
+
 
 int Menu::HandleInput() {
     while (true) {

@@ -1,9 +1,13 @@
 #include "Database.h"
 #include "Menu.h"
+#include "ConsoleUtils.h"
 #include <iostream>
 #include <sstream>
 #include <algorithm>
 #include <windows.h>
+#include <regex>
+#include "Validator.h"
+#include <limits>
 
 Database::Database() {}
 
@@ -15,10 +19,17 @@ void Database::run() {
     structCursorInfo.dwSize = 10;
     SetConsoleCursorInfo(hStdOut, &structCursorInfo);
 
-    std::vector<std::string> menuItems = { "Показать студентов", "Добавить студента", "Загрузить базу данных", "Сохранить базу данных", "Выбрать студента", "Выполнить вариант 88", "Выход" };
+    std::vector<std::string> menuItems = { "Показать студентов", "Доступные группы", "Добавить студента", "Загрузить базу данных", "Сохранить базу данных", "Выбрать студента", "Выполнить вариант 88", "Выход" };
     Menu menu(menuItems);
     while (true) {
         system("CLS");
+        GoToXY(0, 0);
+        SetConsoleTextAttribute(hStdOut, FOREGROUND_RED | FOREGROUND_BLUE | FOREGROUND_INTENSITY); // Белый цвет
+        std::cout << "Курсовая работа по Языкам Программирования 1 курс, 2 семестр";
+
+        GoToXY(0, 2);
+        SetConsoleTextAttribute(hStdOut, FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY); // Фиолетовый цвет
+        std::cout << "Выполнил студент группы БИСО-01-23\nЗемсков Игорь";
         menu.Display();
         int choice = menu.HandleInput();
 
@@ -27,65 +38,32 @@ void Database::run() {
             this->DisplayStudents();
             break;
         case 1:
-            this->AddStudent();
+            this->DisplayGroups();
             break;
         case 2:
-            this->LoadFromFile("students.txt");
+            this->AddStudent();
             break;
         case 3:
-            this->SaveToFile("students.txt");
+            this->LoadFromFile("students.txt");
             break;
         case 4:
-            this->SelectStudent();
+            this->SaveToFile("students.txt");
             break;
         case 5:
-            this->ExecutedTask();
+            this->SelectStudent();
             break;
         case 6:
+            this->ExecutedTask();
+            break;
+        case 7:
+            std::cout << std::endl << std::endl << std::endl;
             return;
+        default:
+            std::cerr << "Неверный выбор. Попробуйте снова.\n";
+            break;
         }
     }
 }
-
-//void Database::run() {
-//    HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-//    CONSOLE_CURSOR_INFO structCursorInfo;
-//    GetConsoleCursorInfo(hStdOut, &structCursorInfo);
-//    structCursorInfo.bVisible = false;
-//    structCursorInfo.dwSize = 10;
-//    SetConsoleCursorInfo(hStdOut, &structCursorInfo);
-//
-//    std::vector<std::string> menuItems = { "Показать студентов", "Добавить студента", "Загрузить базу данных", "Сохранить базу данных", "Выбрать студента", "Выполнить вариант 88", "Выход" };
-//    Menu menu(menuItems);
-//    while (true) {
-//        system("CLS");
-//        menu.Display();
-//        int choice = menu.HandleInput();
-//
-//        switch (choice) {
-//        case 0:
-//            this->DisplayStudents();
-//            break;
-//        case 1:
-//            this->AddStudent();
-//            break;
-//        case 2:
-//            this->LoadFromFile("students.txt");
-//            break;
-//        case 3:
-//            this->SaveToFile("students.txt");
-//            break;
-//        case 4:
-//            this->SelectStudent();
-//            break;
-//        case 5:
-//            this->ExecutedTask();
-//            break;
-//        case 6:
-//            return;
-//        }
-//    }
-//}
 
 void Database::DisplayStudents() {
     system("CLS");
@@ -103,6 +81,23 @@ void Database::DisplayStudents() {
     system("pause");
 }
 
+void Database::DisplayGroups() {
+    system("CLS");
+    std::map<std::string, std::vector<Student>> groups;
+    for (const auto& student : students) {
+        groups[student.GetGroup()].push_back(student);
+    }
+
+    for (const auto& [group, students] : groups) {
+        std::cout << "Группа " << group << ":\n";
+        for (const auto& student : students) {
+            std::cout << student.GetLastName() << " " << student.GetFirstName() << " " << student.GetPatronymic() << "\n";
+        }
+        std::cout << std::endl;
+    }
+    system("pause");
+}
+
 void Database::AddStudent() {
     system("CLS");
     std::string lastName, firstName, patronymic, faculty, department, group, recordBookNumber, gender;
@@ -116,20 +111,59 @@ void Database::AddStudent() {
     std::cin >> patronymic;
     std::cout << "Введите день рождения: ";
     std::cin >> day;
+    if (!Validator::IsValidDay(day)) {
+        std::cerr << "Ошибка, попробуйте еще раз.\n";
+        //system("CLS");
+        std::cout << "Введите день рождения: ";
+        std::cin >> day;
+    }
     std::cout << "Введите месяц рождения: ";
     std::cin >> month;
+    if (!Validator::IsValidMonth(month)) {
+        std::cerr << "Ошибка, попробуйте еще раз.\n";
+        std::cout << "Введите месяц рождения: ";
+        std::cin >> month;
+    }
     std::cout << "Введите год рождения: ";
     std::cin >> year;
+    if (!Validator::IsValidYear(year)) {
+        std::cerr << "Ошибка, попробуйте еще раз.\n";
+        std::cout << "Введите год рождения: ";
+        std::cin >> year;
+    }
     std::cout << "Введите год поступления: ";
     std::cin >> admissionYear;
+    if (!Validator::IsValidYear(year)) {
+        std::cerr << "Ошибка, попробуйте еще раз.\n";
+        std::cout << "Введите год поступления: ";
+        std::cin >> year;
+    }
     std::cout << "Введите факультет: ";
     std::cin >> faculty;
+    if (!Validator::IsValidFacultyName(faculty)) {
+        std::cerr << "Неверный формат факультета.\n";
+        system("CLS");
+        std::cout << "Введите факультет: ";
+        std::cin >> faculty;
+    }
     std::cout << "Введите кафедру: ";
     std::cin >> department;
     std::cout << "Введите группу: ";
     std::cin >> group;
+    if (!Validator::IsValidGroupNumber(group)) {
+        std::cerr << "Неверный формат номера группы.\n";
+        system("CLS");
+        std::cout << "Введите группу в формате ХХХХ-ХХ-ХХ: ";
+        std::cin >> group;
+    }
     std::cout << "Введите номер зачетной книжки: ";
     std::cin >> recordBookNumber;
+    if (!Validator::IsValidStudentID(recordBookNumber)) {
+        std::cerr << "Неверный формат номера зачетной книжки.\n";
+        system("CLS");
+        std::cout << "Введите номер зачетной книжки в формате 23Б0ХХХ: ";
+        std::cin >> recordBookNumber;
+    }
     std::cout << "Введите пол: ";
     std::cin >> gender;
 
@@ -139,120 +173,6 @@ void Database::AddStudent() {
     system("pause");
 
 }
-
-//void Database::SelectStudent() {
-//    system("CLS");
-//    const auto& students = this->GetStudents();
-//    if (students.empty()) {
-//        std::cout << "Нет студентов в базе данных.\n";
-//        system("pause");
-//        return;
-//    }
-//
-//    std::cout << "Введите номер зачетной книжки студента: ";
-//    std::string recordBookNumber;
-//    std::cin >> recordBookNumber;
-//
-//    Student* student = this->GetStudentByRecordBookNumber(recordBookNumber);
-//    if (!student) {
-//        std::cout << "Студент с таким номером зачетной книжки не найден.\n";
-//        system("pause");
-//        return;
-//    }
-//
-//    std::vector<std::string> subMenuItems = { "Просмотреть оценки", "Проставить оценку", "Изменить данные", "Удалить студента", "Назад" };
-//    Menu subMenu(subMenuItems);
-//
-//    while (true) {
-//        system("CLS");
-//        subMenu.Display();
-//        int subChoice = subMenu.HandleInput();
-//
-//        switch (subChoice) {
-//        case 0: { // Просмотреть оценки
-//            system("CLS");
-//            for (int semester = 1; semester <= 9; ++semester) {
-//                const auto& grades = student->GetGrades(semester);
-//                if (!grades.empty()) {
-//                    std::cout << "Семестр " << semester << " \n";
-//                    for (const auto& [subject, grade] : grades) {
-//                        std::cout << subject << " " << grade << "\n";
-//                    }
-//                    std::cout << "\n";
-//                }
-//            }
-//            system("pause");
-//            break;
-//        }
-//        case 1: { // Проставить оценку
-//            system("CLS");
-//            int semester;
-//            std::string subject, grade;
-//
-//            std::cout << "Введите номер семестра: ";
-//            std::cin >> semester;
-//            std::cout << "Введите предмет: ";
-//            std::cin.ignore(80, '\n');
-//            std::getline(std::cin, subject);
-//            std::cout << "Введите оценку: ";
-//            std::cin >> grade;
-//
-//            student->SetGrade(semester, subject, grade);
-//            std::cout << "Оценка добавлена.\n";
-//            system("pause");
-//            break;
-//        }
-//        case 2: { // Изменить данные
-//            system("CLS");
-//            std::string lastName, firstName, patronymic, faculty, department, group, gender;
-//            int day, month, year, admissionYear;
-//
-//            std::cout << "Введите фамилию: ";
-//            std::cin >> lastName;
-//            std::cout << "Введите имя: ";
-//            std::cin >> firstName;
-//            std::cout << "Введите отчество: ";
-//            std::cin >> patronymic;
-//            std::cout << "Введите день рождения: ";
-//            std::cin >> day;
-//            std::cout << "Введите месяц рождения: ";
-//            std::cin >> month;
-//            std::cout << "Введите год рождения: ";
-//            std::cin >> year;
-//            std::cout << "Введите год поступления: ";
-//            std::cin >> admissionYear;
-//            std::cout << "Введите факультет: ";
-//            std::cin >> faculty;
-//            std::cout << "Введите кафедру: ";
-//            std::cin >> department;
-//            std::cout << "Введите группу: ";
-//            std::cin >> group;
-//            std::cout << "Введите пол: ";
-//            std::cin >> gender;
-//
-//            student->UpdateData(lastName, firstName, patronymic, day, month, year, admissionYear, faculty, department, group, gender);
-//            std::cout << "Данные студента обновлены.\n";
-//            system("pause");
-//            break;
-//        }
-//        case 3: { // Удалить студента
-//            system("CLS");
-//            if (this->DeleteStudent(recordBookNumber)) {
-//                std::cout << "Студент отчислен.\n";
-//                system("pause");
-//                return; // Возвращаемся в главное меню
-//            }
-//            else {
-//                std::cout << "Ошибка при удалении студента.\n";
-//                system("pause");
-//            }
-//            break;
-//        }
-//        case 4: // Назад
-//            this->run();
-//        }
-//    }
-//}
 
 void Database::SelectStudent() {
     system("CLS");
@@ -266,7 +186,12 @@ void Database::SelectStudent() {
     std::cout << "Введите номер зачетной книжки студента: ";
     std::string recordBookNumber;
     std::cin >> recordBookNumber;
-
+    if (!Validator::IsValidStudentID(recordBookNumber)) {
+        std::cerr << "Неверный формат номера зачетной книжки.\n";
+        //system("CLS");
+        std::cout << "Введите номер зачетной книжки в формате 23Б0ХХХ: ";
+        std::cin >> recordBookNumber;
+    }
     Student* student = this->GetStudentByRecordBookNumber(recordBookNumber);
     if (!student) {
         std::cout << "Студент с таким номером зачетной книжки не найден.\n";
@@ -274,27 +199,33 @@ void Database::SelectStudent() {
         return;
     }
 
-    std::vector<std::string> subMenuItems = { "Просмотреть оценки", "Проставить оценку", "Изменить данные", "Удалить студента", "Назад" };
+    std::vector<std::string> subMenuItems = { "Просмотреть оценки", "Проставить оценку", "Изменить данные", "Изменить оценку", "Удалить студента", "Назад" };
     Menu subMenu(subMenuItems);
 
     bool running = true;
     while (running) {
         system("CLS");
+        GoToXY(0, 0);
+        SetConsoleTextAttribute(hStdOut, FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY); // Фиолетовый цвет
+        std::cout << "ФИО: " << student->GetLastName() << " " << student->GetFirstName() << " " << student->GetPatronymic() << "\nГруппа: " << student->GetGroup() << "\n";
+
         subMenu.Display();
         int subChoice = subMenu.HandleInput();
 
         switch (subChoice) {
         case 0: { // Просмотреть оценки
             system("CLS");
-            for (int semester = 1; semester <= 9; ++semester) {
+            std::cout << "Введите номер семестра: ";
+            int semester;
+            std::cin >> semester;
+            try {
                 const auto& grades = student->GetGrades(semester);
-                if (!grades.empty()) {
-                    std::cout << "Семестр " << semester << " \n";
-                    for (const auto& [subject, grade] : grades) {
-                        std::cout << subject << " " << grade << "\n";
-                    }
-                    std::cout << "\n";
+                for (const auto& [subject, grade] : grades) {
+                    std::cout << subject << " " << grade << '\n';
                 }
+            }
+            catch (const std::out_of_range&) {
+                std::cout << "Оценки за данный семестр не найдены.\n";
             }
             system("pause");
             break;
@@ -309,6 +240,12 @@ void Database::SelectStudent() {
             std::cout << "Введите предмет: ";
             std::cin.ignore(80, '\n');
             std::getline(std::cin, subject);
+            if (!Validator::IsValidSubjectName(subject)) {
+                std::cerr << "Неверный формат названия предмета.\n";
+                system("CLS");
+                std::cin.ignore(80, '\n');
+                std::getline(std::cin, subject);
+            }
             std::cout << "Введите оценку: ";
             std::cin >> grade;
 
@@ -319,38 +256,77 @@ void Database::SelectStudent() {
         }
         case 2: { // Изменить данные
             system("CLS");
-            std::string lastName, firstName, patronymic, faculty, department, group, gender;
-            int day, month, year, admissionYear;
+            // Считываем данные, которые нужно изменить
+            std::string newData;
+            std::cout << "Выберите данные для изменения:\n1. Фамилия\n2. Имя\n3. Отчество\n4. Факультет\n5. Кафедра\n6. Группа\n7. Номер зачетной книжки\n8. Пол\n";
+            int updateChoice;
+            std::cin >> updateChoice;
 
-            std::cout << "Введите фамилию: ";
-            std::cin >> lastName;
-            std::cout << "Введите имя: ";
-            std::cin >> firstName;
-            std::cout << "Введите отчество: ";
-            std::cin >> patronymic;
-            std::cout << "Введите день рождения: ";
-            std::cin >> day;
-            std::cout << "Введите месяц рождения: ";
-            std::cin >> month;
-            std::cout << "Введите год рождения: ";
-            std::cin >> year;
-            std::cout << "Введите год поступления: ";
-            std::cin >> admissionYear;
-            std::cout << "Введите факультет: ";
-            std::cin >> faculty;
-            std::cout << "Введите кафедру: ";
-            std::cin >> department;
-            std::cout << "Введите группу: ";
-            std::cin >> group;
-            std::cout << "Введите пол: ";
-            std::cin >> gender;
+            switch (updateChoice) {
+            case 1:
+                std::cout << "Введите новую фамилию: ";
+                std::cin >> newData;
+                student->SetLastName(newData);
+                break;
+            case 2:
+                std::cout << "Введите новое имя: ";
+                std::cin >> newData;
+                student->SetFirstName(newData);
+                break;
+            case 3:
+                std::cout << "Введите новое отчество: ";
+                std::cin >> newData;
+                student->SetPatronymic(newData);
+                break;
+            case 4:
+                std::cout << "Введите новый факультет: ";
+                std::cin >> newData;
+                if (!Validator::IsValidFacultyName(newData)) {
+                    std::cerr << "Неверный формат факультета.\n";
+                    break;
+                }
+                student->SetFaculty(newData);
+                break;
+            case 5:
+                std::cout << "Введите новую кафедру: ";
+                std::cin >> newData;
+                student->SetDepartment(newData);
+                break;
+            case 6:
+                std::cout << "Введите новую группу: ";
+                std::cin >> newData;
+                if (!Validator::IsValidGroupNumber(newData)) {
+                    std::cerr << "Неверный формат номера группы.\n";
+                    break;
+                }
+                student->SetGroup(newData);
+                break;
+            case 7:
+                std::cout << "Введите новый номер зачетной книжки: ";
+                std::cin >> newData;
+                student->SetRecordBookNumber(newData);
+                break;
+            case 8:
+                std::cout << "Введите новый пол: ";
+                std::cin >> newData;
+                student->SetGender(newData);
+                break;
+            default:
+                std::cerr << "Неверный выбор. Попробуйте снова.\n";
+                break;
+            }
 
-            student->UpdateData(lastName, firstName, patronymic, day, month, year, admissionYear, faculty, department, group, gender);
-            std::cout << "Данные студента обновлены.\n";
+            // Добавляем проверку данных с использованием Validator
+            std::cout << "Данные успешно изменены.\n";
             system("pause");
             break;
         }
-        case 3: { // Удалить студента
+        case 3: { // Изменить оценку
+            system("CLS");
+            UpdateGrade(student);
+            break;
+        }
+        case 4: { // Удалить студента
             system("CLS");
             if (this->DeleteStudent(recordBookNumber)) {
                 std::cout << "Студент отчислен.\n";
@@ -363,11 +339,101 @@ void Database::SelectStudent() {
             }
             break;
         }
-        case 4: // Назад
+        case 5: // Назад
             running = false; // Возвращаемся в главное меню
             break;
         }
     }
+}
+
+void Database::UpdateStudentData(Student* student) {
+    bool running = true;
+    while (running) {
+        system("CLS");
+        std::vector<std::string> updateMenuItems = { "Изменить фамилию", "Изменить имя", "Изменить отчество", "Изменить факультет", "Изменить кафедру", "Изменить группу", "Изменить номер зачетной книжки", "Изменить пол", "Назад" };
+        Menu updateMenu(updateMenuItems);
+        updateMenu.Display();
+        int choice = updateMenu.HandleInput();
+
+        std::string newData;
+        switch (choice) {
+        case 0: // Изменить фамилию
+            std::cout << "Введите новую фамилию: ";
+            std::cin >> newData;
+            student->SetLastName(newData);
+            break;
+        case 1: // Изменить имя
+            std::cout << "Введите новое имя: ";
+            std::cin >> newData;
+            student->SetFirstName(newData);
+            break;
+        case 2: // Изменить отчество
+            std::cout << "Введите новое отчество: ";
+            std::cin >> newData;
+            student->SetPatronymic(newData);
+            break;
+        case 3: // Изменить факультет
+            std::cout << "Введите новый факультет: ";
+            std::cin >> newData;
+            if (!Validator::IsValidFacultyName(newData)) {
+                std::cerr << "Неверный формат факультета.\n";
+                break;
+            }
+            student->SetFaculty(newData);
+            break;
+        case 4: // Изменить кафедру
+            std::cout << "Введите новую кафедру: ";
+            std::cin >> newData;
+            student->SetDepartment(newData);
+            break;
+        case 5: // Изменить группу
+            std::cout << "Введите новую группу: ";
+            std::cin >> newData;
+            if (!Validator::IsValidGroupNumber(newData)) {
+                std::cerr << "Неверный формат номера группы.\n";
+                break;
+            }
+            student->SetGroup(newData);
+            break;
+        case 6: // Изменить номер зачетной книжки
+            std::cout << "Введите новый номер зачетной книжки: ";
+            std::cin >> newData;
+            student->SetRecordBookNumber(newData);
+            break;
+        case 7: // Изменить пол
+            std::cout << "Введите новый пол: ";
+            std::cin >> newData;
+            student->SetGender(newData);
+            break;
+        case 8: // Назад
+            running = false;
+            break;
+        }
+    }
+}
+
+void Database::UpdateGrade(Student* student) {
+    system("CLS");
+    int semester;
+    std::string subject, newGrade;
+
+    std::cout << "Введите номер семестра: ";
+    std::cin >> semester;
+    std::cout << "Введите предмет: ";
+    std::cin.ignore(80, '\n');
+    std::getline(std::cin, subject);
+    if (!Validator::IsValidSubjectName(subject)) {
+        std::cerr << "Неверный формат названия предмета.\n";
+        system("CLS");
+        std::cin.ignore(80, '\n');
+        std::getline(std::cin, subject);
+    }
+    std::cout << "Введите новую оценку: ";
+    std::cin >> newGrade;
+
+    student->SetGrade(semester, subject, newGrade);
+    std::cout << "Оценка изменена.\n";
+    system("pause");
 }
 
 void Database::SaveToFile(const std::string& filename) {
@@ -390,7 +456,7 @@ void Database::SaveToFile(const std::string& filename) {
             for (int semester = 1; semester <= 9; ++semester) {
                 const auto& grades = student.GetGrades(semester);
                 if (!grades.empty()) {
-                    file << semester;
+                    file << " " << semester;
                     for (const auto& grade : grades) {
                         file << " " << grade.first << " " << grade.second;
                     }
@@ -447,10 +513,10 @@ void Database::ExecutedTask() {
     std::cin >> interval_1 >> interval_2;
     for (int i = 0; i < this->students.size(); i++) {
         bool check = true;
-        if (students[i].GetYear() >= interval_1 and students[i].GetYear() <= interval_2) {
+        if (students[i].GetYear() >= interval_1 && students[i].GetYear() <= interval_2) {
             for (int j = 0; j <= 9; j++) {
-                for (std::string subject : std::vector<std::string>{ "Физика", "Линал", "История", "Матан" }) {
-                    if (students[i].grades[j][subject] == "3") {
+                for (const std::string& subject : std::vector<std::string>{ "Физика", "Линал", "История", "Матан" }) {
+                    if (students[i].GetGrades(j).count(subject) > 0 && students[i].GetGrades(j).at(subject) == "3") {
                         check = false;
                         break;
                     }
@@ -469,6 +535,45 @@ void Database::ExecutedTask() {
     }
     system("pause");
 }
+
+//void Database::ExecutedTask() {
+//    system("CLS");
+//    int interval_1, interval_2, option;
+//    std::cout << "Укажите интервал года рождения:\n";
+//    std::cin >> interval_1 >> interval_2;
+//
+//    std::cout << "Выберите вариант для выполнения задания:\n"
+//        << "1) нет ни одной 3\n"
+//        << "2) нет ни одной 3 и 4\n"
+//        << "3) нет ни одной 5\n";
+//    std::cin >> option;
+//    for (const auto& student : students) {
+//        bool check = true;
+//        if (student.GetYear() >= interval_1 && student.GetYear() <= interval_2) {
+//            for (int semester = 0; semester <= 9; ++semester) {
+//                const auto& grades = student.GetGrades(semester);
+//                for (const auto& [subject, grade] : grades) {
+//                    if ((option == 1 && grade == "3") ||
+//                        (option == 2 && (grade == "3" || grade == "4")) ||
+//                        (option == 3 && grade == "5")) {
+//                        check = false;
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//        else {
+//            check = false;
+//            std::cout << "Нет таких студентов в базе!\n";
+//            break;
+//        }
+//        if (check) {
+//            std::cout << student.GetLastName() << " " << student.GetFirstName() << " ";
+//            std::cout << student.GetPatronymic() << " " << student.GetGroup() << std::endl;
+//        }
+//    }
+//    system("pause");
+//}
 
 const std::vector<Student>& Database::GetStudents() const {
     return students;
